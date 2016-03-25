@@ -25,3 +25,5 @@ app.listen(port, function(err){
 
   console.log(`listening on ${port} :)`)
 })
+
+module.exports = app

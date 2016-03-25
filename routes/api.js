@@ -1,7 +1,6 @@
 "use strict"
 
 let express = require('express')
-let pg = require('pg')
 
 // PG helpers
 let connect = require('../lib/helpers/pg_conn_helper.js')
@@ -35,7 +34,7 @@ router.post('/', (req, res) => {
         rollback(client, err, res, done)
       }
 
-      client.query("INSERT INTO list(subject, details) VALUES(?, ?)", subject, details, (err) => {
+      client.query("INSERT INTO list(subject, details) VALUES($1, $2)", [subject, details], (err) => {
         if(err){
           rollback(client, err, res, done)
         }
@@ -44,12 +43,11 @@ router.post('/', (req, res) => {
           if(err){
             rollback(client, err, res, done)
           }
-          
+
           client.query("COMMIT", (err) => {
             if(err){
               rollback(client, err, res, done)
             }
-
             res.json(results.rows)
             done()
           })
@@ -58,5 +56,10 @@ router.post('/', (req, res) => {
     })
   })
 })
+
+// a different way to try isolating testing differently
+router.get('/:id', require('./api/show.js'))
+router.put('/:id', require('./api/update.js'))
+router.delete('/:id', require('./api/destroy.js'))
 
 module.exports = router
