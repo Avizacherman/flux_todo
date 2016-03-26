@@ -16,19 +16,20 @@ let create = (req, res) => {
     // this also a json response
     client.query("BEGIN", (err) => {
       if(err){
-        rollback(client, err, res, done)
+        rollback.run(client, err, res, done)
       }
       client.query("INSERT INTO list(subject, details) VALUES($1, $2)", [subject, details], (err) => {
         if(err){
-          rollback(client, err, res, done)
+          rollback.run(client, err, res, done)
         }
+
         client.query("SELECT * FROM list", (err, results) => {
           if(err){
-            rollback(client, err, res, done)
+            rollback.run(client, err, res, done)
           }
           client.query("COMMIT", (err) => {
             if(err){
-              rollback(client, err, res, done)
+              rollback.run(client, err, res, done)
             }
             res.json(results.rows)
             done()

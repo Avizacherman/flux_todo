@@ -6,24 +6,18 @@ require('../../helpers/test_helpers.js')()
 
 describe("Show Routes", () => {
 
-  let req, res, client, connectStub
+  let reqMock, resMock, client, connectStub, queryStub
 
   beforeEach( () => {
     // Mocking request/response cycle
     // Response object has placeholder to hold data for inspection
-    req = {params: {id: 1}}
-    res = { data: {},
+    reqMock = {params: {id: 1}}
+    resMock = { data: {},
       json: function(obj){
       this.data = obj }
     }
 
-    // create some fake data that would come back from the database
-    // The query is a stub that provides its callback with this fake data
-    // the connection is a stub that provides the client stub
-    let fakeData = { rows: [{id: 1, subject: 'Do it'}] }
-    let queryStub = stub()
-    client = { query: queryStub.callsArgWith(2, null, fakeData) }
-    connectStub = stub(pg, 'connect').yields(null, client, spy())
+    queryStub = stub()
 
   })
 
@@ -31,11 +25,26 @@ describe("Show Routes", () => {
     pg.connect.restore()
   })
 
-  it("Should retrieve data from the DB", (done) => {
-    show(req, res)
-    expect(res.data.id).to.eq(1)
-    expect(res.data.subject).to.eq('Do it')
-    expect(res.data).to.be.an('object')
-    done()
+  it("Should retrieve data from the DB", () => {
+    let fakeData = { rows: [{id: 1, subject: 'Do it'}] }
+    client = { query: queryStub }
+    connectStub = stub(pg, 'connect').yields(null, client, spy())
+    queryStub.callsArgWith(2, null, fakeData)
+
+    show(reqMock, resMock)
+    expect(resMock.data.id).to.eq(1)
+    expect(resMock.data.subject).to.eq('Do it')
+    expect(resMock.data).to.be.an('object')
+  })
+
+  it("Should send an error JSON if no data is retreived", () => {
+    client = { query: queryStub }
+    connectStub = stub(pg, 'connect').yields(null, client, spy())
+    queryStub.callsArgWith(2, null, {rows: []})
+
+    show(reqMock, resMock)
+    expect(resMock.data).to.be.an('object')
+    expect(resMock.data).to.have.property('error')
+    expect(resMock.data.error).to.eq('No Such Record')
   })
 })

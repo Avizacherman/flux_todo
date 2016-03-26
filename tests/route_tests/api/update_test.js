@@ -24,7 +24,3 @@ describe("Update Route Mocks", () => {
   })
 
 })
-
-describe("Update Route Test DB", () => {
-
-})

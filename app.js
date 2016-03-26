@@ -7,8 +7,8 @@ let hbs = require('hbs')
 
 let app = express()
 
-
-app.set('view-engine', hbs)
+app.set('views', './views')
+app.set('view engine', 'hbs')
 
 //middleware
 app.use(express.static('public'))
