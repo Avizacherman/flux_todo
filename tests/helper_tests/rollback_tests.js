@@ -10,7 +10,6 @@ describe("Testing Rollback Helper", () => {
     let clientMock = {query: queryStub}
 
     rollback.run(clientMock)
-
     expect(queryStub.withArgs("ROLLBACK").calledOnce).to.be.true
 
     done()

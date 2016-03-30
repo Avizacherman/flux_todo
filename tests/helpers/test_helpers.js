@@ -12,6 +12,7 @@ let testHelper = () => {
   global.spy = sinon.spy
   global.stub = sinon.stub
   global.request = chai.request
+  global.match = sinon.match
 }
 
 module.exports = testHelper

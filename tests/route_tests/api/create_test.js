@@ -6,7 +6,7 @@ let rollback = require ('../../../lib/helpers/rollback_helper.js')
 
 require('../../helpers/test_helpers.js')()
 
-describe("create Route Mocks", () => {
+describe("Create Route Tests", () => {
   let client, connectStub, reqMock, resMock, queryStub
 
   beforeEach(() => {
@@ -27,8 +27,10 @@ describe("create Route Mocks", () => {
     queryStub = stub()
     queryStub.onCall(0).yields(null)
     queryStub.onCall(1).yields(null)
-    queryStub.onCall(2).yields(null, {row: []})
+    queryStub.onCall(2).yields(null, {rows: []})
     queryStub.onCall(3).yields(null)
+
+    queryStub.yields(null, {rows: []})
 
     client = { query: queryStub}
     connectStub = stub(pg, 'connect').yields(null, client, function(){ done() })
@@ -36,6 +38,18 @@ describe("create Route Mocks", () => {
     create(reqMock, resMock)
     expect(connectStub.callCount).to.eq(1)
     expect(queryStub.callCount).to.eq(4)
+  })
+
+  it("Should make an INSERT query on a succesful call", (done) => {
+    queryStub = stub()
+    queryStub.yields(null, {rows: []})
+
+    client = { query: queryStub}
+    connectStub = stub(pg, 'connect').yields(null, client, function(){ done() })
+
+    create(reqMock, resMock)
+    expect(connectStub.callCount).to.eq(1)
+    expect(queryStub.withArgs(match(/INSERT INTO [0-z (),$]+/)).calledOnce).to.be.true
   })
 
   it("Should call the rollback helper on an error", (done) => {
